@@ -1,20 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+
+// Import Unistyles configuration
+import { useState } from "react";
+import SkiaCanvas from "./SkiaCanvas";
+import SkiaCanvasWithUnistyles from "./SkiaCanvasWithUnistyles";
+import "./unistyles";
 
 export default function App() {
+  const [mode, setMode] = useState<"default" | "unistyles">("default");
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Pressable
+      style={StyleSheet.absoluteFillObject}
+      onPress={() =>
+        setMode((currentMode) =>
+          currentMode === "default" ? "unistyles" : "default"
+        )
+      }
+    >
+      {mode === "default" ? <SkiaCanvas /> : <SkiaCanvasWithUnistyles />}
+    </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
