@@ -1,56 +1,84 @@
-# React Native Skia + Unistyles Bug Reproduction
+## Bug Report: Unistyles Styles Not Applying to Animated Text on Web
 
-This repository demonstrates a bug where Unistyles styling doesn't affect React Native Skia canvas styling on web platforms, while it works correctly on iOS.
+### Description
 
-## The Issue
+When using the `react-native-unistyles` library to style `Animated.Text` (or other Animated) components, the styles defined in the `react-native-unistyles` stylesheet do not apply when running the application in a web browser. In this example, the styles work correctly on iOS. On the web, the text spins as expected, but the text styling (e.g., color, font size) from the `unistyles` stylesheet is not applied. On iOS, the text spins and the styling is applied correctly, resulting in a red spinning text.
 
-When using Unistyles StyleSheet to style a React Native Skia Canvas component with `withUnistyles` or without, the styles are not applied correctly on web platform, but work as expected on iOS (Android not tested). When using regular React Native StyleSheet, the styles work correctly on both platforms.
+### Steps to Reproduce
 
-The issue appears to be that on web, the Unistyles-wrapped Canvas receives default React Native web styles instead of any of the styles that are applied.
+1. Set up a React Native project with `react-native-reanimated` and `react-native-unistyles`.
+2. Define styles using `react-native-unistyles`.
+3. Apply the styles to an `Animated.Text` component.
+4. Run the application in a web browser and on an iOS device.
 
-## How to Run
+### Expected Behavior
 
-1. Clone this repository:
+The styles defined in the `unistyles` stylesheet should be applied to the `Animated.Text` component on both web and iOS platforms.
 
-   ```
-   git clone https://github.com/lundenmiika/rn-skia-unistyles-bug-reproduction.git
-   cd rn-skia-unistyles-bug-reproduction
-   ```
+### Actual Behavior
 
-2. Install dependencies:
+- **Web**: The text spins, but the styles from the `unistyles` stylesheet are not applied.
+- **iOS**: The text spins and the styles from the `unistyles` stylesheet are applied correctly (e.g., red spinning text).
 
-   ```
-   npm install
-   ```
+### Example Code
 
-3. Start the Expo development server:
+```tsx
+import { Pressable, Text, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
+import { useState, useEffect } from "react";
+import "./unistyles";
+import Animated, {
+  Easing,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated";
 
-   ```
-   npm run start
-   ```
+export default function App() {
+  const rotation = useSharedValue(0);
 
-4. Press 'w' to open in web browser or 'i' to open in iOS simulator
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 2000,
+        easing: Easing.linear,
+      }),
+      -1
+    );
+  }, []);
 
-## How to See the Bug
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotate: `${rotation.value}deg` }],
+    };
+  });
 
-1. When the app opens, you'll see a red canvas with circles (using regular StyleSheet)
-2. Click/tap anywhere on the screen to toggle to the Unistyles version (cyan background)
-3. On iOS: The canvas fills the entire screen in both modes and background switch from red to cyan works correctly
-4. On Web: Only the regular StyleSheet version fills the screen with correct color transitions; the Unistyles version appears with default size and background switch from red to cyan does not work. Inspecting shows that none of the styles are applied to enclosing div
+  return (
+    <View style={styles.container}>
+      <Animated.Text style={[styles.textStyles, animatedStyle]}>
+        Hello
+      </Animated.Text>
+    </View>
+  );
+}
 
-## Code Explanation
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textStyles: {
+    fontSize: 20,
+    color: "red",
+  },
+});
+```
 
-The app toggles between two components:
+### Environment
 
-- `SkiaCanvas.tsx`: Uses regular React Native StyleSheet (works on both platforms)
-- `SkiaCanvasWithUnistyles.tsx`: Uses Unistyles (works on iOS, fails on web)
-
-Both components use identical styling with `StyleSheet.absoluteFillObject`.
-
-## Environment
-
-- react-native-unistyles: 3.0.0-beta.8
-- @shopify/react-native-skia: 1.5.0
-- react-native: 0.76.7
-- react-native-web: 0.19.13
-- expo: 52.0.37
+- **React Native**: 0.76.7
+- **react-native-reanimated**: 3.17.1
+- **react-native-unistyles**: 3.0.0-nightly-20250318
+- **Platform**: Web, iOS
