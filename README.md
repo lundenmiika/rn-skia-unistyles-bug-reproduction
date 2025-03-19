@@ -80,5 +80,5 @@ const styles = StyleSheet.create({
 
 - **React Native**: 0.76.7
 - **react-native-reanimated**: 3.17.1
-- **react-native-unistyles**: 3.0.0-nightly-20250318
+- **react-native-unistyles**: 3.0.0-nightly-20250319
 - **Platform**: Web, iOS
